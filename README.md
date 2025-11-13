@@ -1,4 +1,12 @@
-# CounterApp-Android-Native-C++_integration-MVVM-Clean-architecture
+
+## Android Showcase
+
+- [NdKCounterApp](#ndKCounterApp)
+- [ChatExample](#chatExample)
+
+---
+
+## NdKCounterApp
 
 This is sample app to demonstrating integration with small C++ code, following the MVVM (Model-View-ViewModel) architecture pattern and clean architecture principles.
 
@@ -18,12 +26,10 @@ This repository follows the MVVM Clean Architecture pattern:
      Data  (Repo Impl) 
 ```
 
----
+## ChatExample
 
-## Screenshots
-<img width="200" height="400" alt="Screenshot_20251013_094402" src="https://github.com/user-attachments/assets/88830553-2bec-4702-a054-9cab43e016c1" />
+This is sample module for chat example, how the chat application worl witn latest clean architecture and MVI pattern
 
-<img width="200" height="400" alt="Screenshot_20251013_094445" src="https://github.com/user-attachments/assets/efb93b6b-413e-4670-83b1-e6f6862d2659" />
 
----
+
 
