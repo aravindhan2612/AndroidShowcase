@@ -26,5 +26,6 @@
             android:theme="@style/Theme.AndroidShowcase" />
         <activity android:name="com.ab.couterexamplewithndk.presentation.ui.CounterNDKActivity"
             android:theme="@style/Theme.CounterApp"/>
+        <activity android:name="com.ab.chatexample.ChatExampleActivity"/>
     </application>
 </manifest>

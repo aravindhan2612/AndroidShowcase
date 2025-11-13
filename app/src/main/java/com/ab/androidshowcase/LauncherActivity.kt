@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.ab.androidshowcase.ui.theme.AndroidShowcaseTheme
+import com.ab.chatexample.ChatExampleActivity
 import com.ab.couterexamplewithndk.presentation.ui.CounterNDKActivity
 import com.ab.material3expressive.M3ExpressiveActivity
 
@@ -68,6 +69,15 @@ fun LauncherScreen() {
             }
         ) {
             Text(text = "Go to NDKCounterApp")
+        }
+
+        Button(
+            onClick = {
+                val intent = Intent(context, ChatExampleActivity::class.java)
+                context.startActivity(intent)
+            }
+        ) {
+            Text(text = "Go to ChatExample")
         }
     }
 }
