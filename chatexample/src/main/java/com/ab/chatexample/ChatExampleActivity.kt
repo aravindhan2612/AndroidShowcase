@@ -47,7 +47,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.ab.chatexample.theme.ChatExampleTheme
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import kotlin.random.Random
 
@@ -95,21 +96,19 @@ class MessagingRepositoryImpl(
     override val incomingMessages: Flow<IncomingMessage> = _incomingMessages.asSharedFlow()
     override val messageResults: Flow<SendConfirmation> = _messageResults.asSharedFlow()
 
-    override suspend fun sendMessage(message: OutgoingMessage) {
-        GlobalScope.launch {
-            mutex.withLock {
-                delay(networkDelay)
-                val failed = Random.nextDouble() < failureProbability
-                val confirmation = if (failed) {
-                    SendConfirmation(message.id, SendConfirmation.Result.Failure)
-                } else {
-                    SendConfirmation(message.id, SendConfirmation.Result.Success)
-                }
-                _messageResults.emit(confirmation)
+    override suspend fun sendMessage(message: OutgoingMessage) = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            delay(networkDelay)
+            val failed = Random.nextDouble() < failureProbability
+            val confirmation = if (failed) {
+                SendConfirmation(message.id, SendConfirmation.Result.Failure)
+            } else {
+                SendConfirmation(message.id, SendConfirmation.Result.Success)
+            }
+            _messageResults.emit(confirmation)
 
-                if (!failed) {
-                    _incomingMessages.emit(TextualMessage("Echo: ${message.message}"))
-                }
+            if (!failed) {
+                _incomingMessages.emit(TextualMessage("Echo: ${message.message}"))
             }
         }
     }
@@ -126,14 +125,6 @@ class ObserveSendConfirmationsUseCase(private val messageRepository: MessagingRe
 class SendMessageUseCase(private val messageRepository: MessagingRepository) {
     suspend operator fun invoke(message: OutgoingMessage) = messageRepository.sendMessage(message)
 }
-
-data class Message(
-    val message: String,
-    val color: Int,
-    val isOutgoing: Boolean,
-    val id: String,
-    val failure: Boolean = false
-)
 
 sealed interface UIIntent {
     data class InputChange(val text: String) : UIIntent
@@ -341,9 +332,10 @@ fun ChatScreen(viewModel: ChatViewModel) {
 @Composable
 fun MessageList(
     state: LazyListState,
-    messages: List<UIMessage>, onRetry: (UUID, String) -> Unit) {
+    messages: List<UIMessage>, onRetry: (UUID, String) -> Unit
+) {
     LazyColumn(
-        state =state,
+        state = state,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
@@ -427,23 +419,23 @@ fun ChatInput(
     onSend: () -> Unit,
     isSending: Boolean
 ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = text,
-                onValueChange = onTextChanged,
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Write a message") }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = onSend, enabled = text.isNotBlank() && !isSending) {
-                Text("Send")
-            }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = text,
+            onValueChange = onTextChanged,
+            modifier = Modifier.weight(1f),
+            placeholder = { Text("Write a message") }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = onSend, enabled = text.isNotBlank() && !isSending) {
+            Text("Send")
         }
+    }
 }
 
 class ChatExampleActivity : ComponentActivity() {
